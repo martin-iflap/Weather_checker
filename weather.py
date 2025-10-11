@@ -12,6 +12,7 @@ class GetWeather:
     def __init__(self, url=BASE_URL):
         self.url = BASE_URL
         self.data = self.get_weather()
+        self.get_data()
         self.snowfall = None
         self.precipitation = None
         self.precipitation_forecast = None
@@ -24,7 +25,6 @@ class GetWeather:
         try:
             response = requests.get(self.url)
             data = response.json()
-            self.get_data()
             return data
         except Exception as e:
             print(f"Error fetching weather data: {e}")
@@ -56,7 +56,7 @@ class GetWeather:
                             f"Tomorrow's forecast:\n"
                             f"Snowfall: {self.snowfall_forecast}cm\n"
                             f"Precipitation: {self.precipitation_forecast}mm\n"
-                            f"Temperature between {self.min_tmp} and {self.max_tmp}C.")
+                            f"Temperature between {self.min_tmp} and {self.max_tmp}°C.")
             return msg
         else:
             return None
@@ -67,8 +67,8 @@ class SendEmail:
         self.email_password = email_password
 
     def send_email(self, msg: EmailMessage):
-        """Send an email using SMTP"""
-        with smtplib.SMTP('smtp.gmail.com', 465) as smtp:
+        """Send an email using SMTP_SSL"""
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
             smtp.sendmail(EMAIL_ADDRESS, RECEIVER_ADDRESS, str(msg))
 
@@ -76,6 +76,7 @@ class SendEmail:
 
 if __name__ == "__main__":
     weather = GetWeather()
-    email = SendEmail()
     message = weather.create_message()
-    email.send_email(message)
+    if message:
+        email = SendEmail()
+        email.send_email(message)
