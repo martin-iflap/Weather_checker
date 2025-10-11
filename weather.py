@@ -1,6 +1,11 @@
 import requests
+import smtplib
+from email.message import EmailMessage
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude=48.8411&longitude=19.6331&daily=snowfall_sum,precipitation_sum,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&past_days=1&forecast_days=1&wind_speed_unit=ms"
+EMAIL_ADDRESS = ''
+EMAIL_PASSWORD = ''
+RECEIVER_ADDRESS = ''
 
 
 class GetWeather:
@@ -14,12 +19,15 @@ class GetWeather:
         self.min_tmp = None
         self.max_tmp = None
 
-    def get_weather(self):
+    def get_weather(self) -> dict:
+        """Fetch weather data from the API"""
         response = requests.get(self.url)
         data = response.json()
+        self.get_data()
         return data
 
-    def get_data(self):
+    def get_data(self) -> None:
+        """Extract relevant data from the API response"""
         self.snowfall = self.data['daily']['snowfall_sum'][0]
         self.precipitation = self.data['daily']['precipitation_sum'][0]
         self.precipitation_forecast = self.data['daily']['precipitation_sum'][1]
@@ -27,17 +35,28 @@ class GetWeather:
         self.min_tmp = self.data['daily']['temperature_2m_min'][1]
         self.max_tmp = self.data['daily']['temperature_2m_max'][1]
 
-    def check_for_snow(self):
+    def check_for_snow(self) -> bool:
+        """Check for snowfall"""
         if self.snowfall > 0:
             return True
         else:
             return False
 
-    def respond(self):
+    def create_message(self) -> EmailMessage|None:
+        """Create an email message if there is snowfall else None"""
         if self.check_for_snow():
-            message = f"Today we had {self.snowfall}cm of snow and {self.precipitation}mm of rain.\n"
+            msg = EmailMessage()
+            msg['Subject'] = 'Snow Alert!'
+            msg['From'] = EMAIL_ADDRESS
+            msg['To'] = RECEIVER_ADDRESS
+            msg.set_content(f"There is {self.snowfall}cm of new snow and total precipitation of {self.precipitation}mm today!\n"
+                            f"Tomorrow's forecast:\n"
+                            f"Snowfall: {self.snowfall_forecast}cm\n"
+                            f"Precipitation: {self.precipitation_forecast}mm\n"
+                            f"Temperature between {self.min_tmp} and {self.max_tmp}C.")
+            return msg
         else:
-            print("No snow today")
+            return None
 
 if __name__ == "__main__":
     weather = GetWeather()
