@@ -21,10 +21,13 @@ class GetWeather:
 
     def get_weather(self) -> dict:
         """Fetch weather data from the API"""
-        response = requests.get(self.url)
-        data = response.json()
-        self.get_data()
-        return data
+        try:
+            response = requests.get(self.url)
+            data = response.json()
+            self.get_data()
+            return data
+        except Exception as e:
+            print(f"Error fetching weather data: {e}")
 
     def get_data(self) -> None:
         """Extract relevant data from the API response"""
@@ -58,5 +61,21 @@ class GetWeather:
         else:
             return None
 
+class SendEmail:
+    def __init__(self, email_address=EMAIL_ADDRESS, email_password=EMAIL_PASSWORD):
+        self.email_address = email_address
+        self.email_password = email_password
+
+    def send_email(self, msg: EmailMessage):
+        """Send an email using SMTP"""
+        with smtplib.SMTP('smtp.gmail.com', 465) as smtp:
+            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            smtp.sendmail(EMAIL_ADDRESS, RECEIVER_ADDRESS, str(msg))
+
+
+
 if __name__ == "__main__":
     weather = GetWeather()
+    email = SendEmail()
+    message = weather.create_message()
+    email.send_email(message)
