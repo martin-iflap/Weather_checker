@@ -3,10 +3,9 @@ import smtplib
 from email.message import EmailMessage
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude=48.8411&longitude=19.6331&daily=snowfall_sum,precipitation_sum,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&past_days=1&forecast_days=1&wind_speed_unit=ms"
-EMAIL_ADDRESS = ''
+EMAIL_ADDRESS = 'fuck this shit!'
 EMAIL_PASSWORD = ''
-RECEIVER_ADDRESS = ''
-
+RECEIVER_ADDRESS = 'are you fucking kidding me?' # did I just really spent an hour debugging this just to find out the email address cant be empty even for the test?
 
 class GetWeather:
     def __init__(self, url=BASE_URL):
@@ -40,7 +39,7 @@ class GetWeather:
 
     def check_for_snow(self) -> bool:
         """Check for snowfall"""
-        if self.snowfall > 0:
+        if self.snowfall <= 0 or self.snowfall_forecast > 0:
             return True
         else:
             return False
@@ -68,10 +67,13 @@ class SendEmail:
 
     def send_email(self, msg: EmailMessage):
         """Send an email using SMTP_SSL"""
+        print(msg.get_content())
         try:
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                smtp.sendmail(EMAIL_ADDRESS, RECEIVER_ADDRESS, str(msg))
+            # with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                # smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                # smtp.sendmail(EMAIL_ADDRESS, RECEIVER_ADDRESS, str(msg))
+            with smtplib.SMTP('localhost', 1025) as smtp:   # python -m smtpd -c DebuggingServer -n localhost:1025
+                smtp.send_message(msg)
                 print("Email sent successfully!")
         except Exception as e:
             print(f"Error sending email: {e}")
