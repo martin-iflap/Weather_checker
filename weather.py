@@ -1,11 +1,14 @@
 import requests
 import smtplib
 from email.message import EmailMessage
+import schedule
+import time
+
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude=48.8411&longitude=19.6331&daily=snowfall_sum,precipitation_sum,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&past_days=1&forecast_days=1&wind_speed_unit=ms"
-EMAIL_ADDRESS = 'fuck this shit!'
+EMAIL_ADDRESS = 'Hell nah!'
 EMAIL_PASSWORD = ''
-RECEIVER_ADDRESS = 'are you fucking kidding me?' # did I just really spent an hour debugging this just to find out the email address cant be empty even for the test?
+RECEIVER_ADDRESS = 'Are you fucking kidding me?' # did I just really spent an hour debugging this just to find out the email address cant be empty even for the test?
 
 class GetWeather:
     def __init__(self, url=BASE_URL):
@@ -66,7 +69,7 @@ class SendEmail:
         self.email_password = email_password
 
     def send_email(self, msg: EmailMessage):
-        """Send an email using SMTP_SSL"""
+        """Send an email using SMTP_SSL or test email using debugging server"""
         print(msg.get_content())
         try:
             # with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -78,11 +81,16 @@ class SendEmail:
         except Exception as e:
             print(f"Error sending email: {e}")
 
-
-
-if __name__ == "__main__":
+def main() -> None:
+    """Main function to get weather data and send email"""
     weather = GetWeather()
     message = weather.create_message()
     if message:
         email = SendEmail()
         email.send_email(message)
+
+if __name__ == "__main__":
+    schedule.every().day.at("20:57").do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
