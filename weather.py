@@ -11,14 +11,14 @@ RECEIVER_ADDRESS = ''
 class GetWeather:
     def __init__(self, url=BASE_URL):
         self.url = BASE_URL
-        self.data = self.get_weather()
-        self.get_data()
         self.snowfall = None
         self.precipitation = None
         self.precipitation_forecast = None
         self.snowfall_forecast = None
         self.min_tmp = None
         self.max_tmp = None
+        self.data = self.get_weather()
+        self.get_data()
 
     def get_weather(self) -> dict:
         """Fetch weather data from the API"""
@@ -68,9 +68,13 @@ class SendEmail:
 
     def send_email(self, msg: EmailMessage):
         """Send an email using SMTP_SSL"""
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            smtp.sendmail(EMAIL_ADDRESS, RECEIVER_ADDRESS, str(msg))
+        try:
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                smtp.sendmail(EMAIL_ADDRESS, RECEIVER_ADDRESS, str(msg))
+                print("Email sent successfully!")
+        except Exception as e:
+            print(f"Error sending email: {e}")
 
 
 
